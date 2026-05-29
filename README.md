@@ -218,6 +218,107 @@ data/SENTICAP/
 ├── negative/
 └── val2014/
 ```
+### 模型权重与融合结果交付说明
+
+由于本仓库涉及多种 LoRA 融合方法和大量任务组合，合并后产出的 dense model 体积较大。例如在 GLUE/T5 场景中，即使是最简单的 Linear 方法，每个 two-task pair 保存后的融合模型也可能接近 1GB；若对 8 个 GLUE 任务进行两两组合，共包含 28 个 pair，单个方法就会产生数十 GB 的模型文件。若进一步保存 RegMean、DARE、KnOTS、IterIS、TALS-DRC 等多个方法的全部融合模型，整体存储体积会显著增加，不利于仓库管理、传输和复现。
+
+因此，本仓库采用如下交付策略：
+
+1. **单任务 LoRA 微调权重会单独保存和提供**
+   单 LoRA 权重体积相对较小，是复现后续融合实验的基础。当前主要包括：
+
+   * GLUE 普通 LoRA；
+   * GLUE OSRM LoRA；
+   * SENTICAP/BLIP positive 与 negative LoRA。
+
+2. **融合后的 dense model 默认不全部提供**
+   对于 Linear、RegMean、DARE、KnOTS、IterIS 以及 TALS-DRC 等融合方法，默认不在仓库中直接保存所有 pair 的合并后模型权重。若需要某个具体 pair 的融合模型，可以根据本仓库提供的脚本、配置文件和命令重新生成。
+
+3. **提供完整可复现的合并脚本和配置文件**
+   本仓库保留所有用于复现融合实验的核心脚本和配置文件，包括：
+
+   * `Linear.py`
+   * `RegMean.py`
+   * `DARE.py`
+   * `KnOTS.py`
+   * `KnOTS_TIES.py`
+   * `KnOTS_Linear.py`
+   * `IterIS.py`
+   * `Linear_TALS_DRC.py`
+   * `RegMean_TALS_DRC.py`
+   * `DARE_TALS_DRC.py`
+   * `KnOTS_Linear_TALS_DRC.py`
+   * `IterIS_TALS_DRC.py`
+   * `run_all_glue_pairs.py`
+   * `config/methods-config/iteris-config.yaml`
+   * `config/GLUE-t5-lora-train-config/*.yaml`
+
+4. **结果文件会保留用于复现实验统计**
+   实验结果主要通过 CSV 文件保存，包括：
+
+   * `pair_merge_results.csv`
+   * `experiment_registry.csv`
+   * `vlm_caption_results.csv`
+   * `drc_alpha_search_results.csv`
+   * `summary/` 下的汇总结果文件
+
+   这些文件用于记录每次实验的指标、运行时间、显存占用、alpha 搜索结果和 pair-level 平均结果，便于在不直接保存全部融合模型的情况下复现实验结论。
+
+5. **TALS-DRC 类方法的说明**
+   TALS-DRC 类方法通常依赖已有 coarse merged model，并在推理阶段构造或加载任务补偿方向。因此，对于这类方法，仓库重点提供：
+
+   * 对应 coarse model 的生成脚本；
+   * TALS-DRC 运行脚本；
+   * 关键配置文件；
+   * alpha 搜索结果；
+   * 必要时提供 direction cache 或重新生成 cache 的命令。
+
+   若未直接提供某个 TALS-DRC 的最终模型权重，可通过对应 coarse model、单任务 LoRA 和配置文件重新生成。
+
+建议的模型资源整理方式如下：
+
+```text
+lora_merging_artifacts/
+├── 01_single_lora_finetuning/
+│   ├── 01_GLUE_normal_lora/
+│   ├── 02_GLUE_OSRM_lora/
+│   └── 03_SENTICAP_BLIP_lora/
+│
+└── 02_reproduce_merging/
+    ├── 01_scripts/
+    ├── 02_configs/
+    ├── 03_results/
+    └── 04_logs_or_cache_optional/
+```
+
+其中：
+
+| 目录                           | 内容                                                 |
+| ---------------------------- | -------------------------------------------------- |
+| `01_GLUE_normal_lora/`       | 普通 GLUE 单任务 LoRA，例如 `T5-MNLI-LoRA`、`T5-RTE-LoRA` 等 |
+| `02_GLUE_OSRM_lora/`         | OSRM 训练得到的 GLUE 单任务 LoRA                           |
+| `03_SENTICAP_BLIP_lora/`     | BLIP/SENTICAP 的 positive 与 negative LoRA           |
+| `01_scripts/`                | 所有融合方法和 TALS-DRC 的复现脚本                             |
+| `02_configs/`                | 训练和融合所需配置文件                                        |
+| `03_results/`                | 实验结果 CSV、summary 汇总文件                              |
+| `04_logs_or_cache_optional/` | 可选日志文件、direction cache 或中间结果                       |
+
+如需复现某个融合模型，可按照 README 中对应方法的运行命令重新生成。例如：
+
+```bash
+python Linear.py \
+  --task_type GLUE_t5 \
+  --config config/methods-config/iteris-config.yaml
+```
+
+或批量运行 GLUE 两两融合实验：
+
+```bash
+python run_all_glue_pairs.py \
+  --gpus 0,1,2,3,4 \
+  --method linear \
+  --continue_on_error
+```
 
 ---
 
