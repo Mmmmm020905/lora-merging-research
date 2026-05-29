@@ -1,0 +1,24 @@
+# Recommended main dependency file for Linux.
+# If your machine needs a specific CUDA/CPU PyTorch build, install the matching
+# torch/torchvision wheels first, then run:
+#   pip install -r requirements_linux.txt
+
+accelerate==0.34.2
+datasets==2.18.0
+evaluate==0.4.2
+huggingface-hub==0.24.6
+nltk==3.8.1
+numpy==1.26.4
+pandas==2.2.1
+peft==0.12.0
+Pillow==10.2.0
+pycocoevalcap==1.2
+PyYAML==6.0.1
+sacrebleu==2.4.1
+safetensors==0.4.5
+scikit-learn==1.4.2
+sentencepiece==0.2.0
+torch==2.2.0
+torchvision==0.17.0
+tqdm==4.65.0
+transformers==4.44.2

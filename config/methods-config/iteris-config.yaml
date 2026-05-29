@@ -1,0 +1,447 @@
+seed: 42
+
+GLUE_t5:
+  max_iter: 10
+  per_device_eval_batch_size: 16
+  task_targets: ['mnli', 'cola']
+  with_pretrain_matrix: 0
+  model_name: /data2/centrai/mizijie_intern/IterIS-merging-main/flan-t5-base
+  max_length: 256
+  lora_alpha: [32, 32]
+  manual_ceof: [1, 1]
+  alpha_1: 0.0000001
+  alpha_2: 0.0000001
+  reg_ceof: 0.0
+  rank: 8
+  select_long: 1
+  samples_num: 50
+  if_divide: false
+  if_balance: true
+  shuffle: true
+  inner_num: 4
+  outer_num: 5
+  save: 1
+
+  # Linear / OSRM-Linear top-level settings
+  # These are expanded from method_configs.linear so Linear.py can read them directly.
+  linear_method_name: OSRM_Linear
+  lora_source: osrm
+  lora_root: OSRM_LoRA
+  linear_weights: [0.5, 0.5]
+
+  regmean_alpha: 0.9
+  regmean_eps: 1.0e-6
+
+  tals_common: &tals_common
+    drc_inject_position: lora_input
+    drc_alpha_search: true
+    drc_alpha_candidates: [0.0, 0.03, 0.1, 0.2, 0.3, 0.5]
+    drc_alpha: 0.3
+    drc_samples_per_task: 50
+    drc_target_part: encoder
+    drc_target_modules: ["q", "v"]
+    drc_target_layers: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    drc_normalize_direction: true
+    drc_use_hidden_norm_scale: false
+    drc_rebuild_cache: true
+
+    tals_subspace_source: missing
+    tals_rank: 8
+    tals_gamma: 0.5
+    tals_eps: 1.0e-6
+    tals_weight_norm: mean
+    tals_svd_center: false
+    tals_fallback_to_base: false
+
+    tals_use_layer_weight: true
+    tals_layer_weight_score: ler_act
+    tals_layer_weight_norm: mean_one
+    tals_layer_weight_clip_min: null
+    tals_layer_weight_clip_max: null
+
+  method_configs:
+    linear:
+      linear_method_name: OSRM_Linear
+      lora_source: osrm
+      lora_root: OSRM_LoRA
+      linear_weights: [0.5, 0.5]
+      save: 1
+
+    # linear:
+    #   linear_method_name: Linear
+    #   lora_source: default
+    #   lora_root: best_LoRA
+    #   linear_weights: [0.5, 0.5]
+    #   save: 1
+
+    dare:
+      dare_merge_method: dare-ties
+      dare_drop_rate: 0.1
+      dare_seed: 420
+      dare_use_rescale: true
+      dare_scaling_coeffs: 1.0
+
+      dare_topK: 70
+      dare_sign_resolve_mode: sum_of_values
+      dare_merging_type: mean
+
+      dare_do_search: true
+      dare_search_early_stop: false
+
+      dare_scaling_coeffs_candidates: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+      dare_pruning_coeffs_candidates: [0.0, 0.05, 0.1, 0.2, 0.3]
+      dare_topK_candidates: [20, 40, 60, 80, 100]
+
+      save_best_model: true
+      save: 1
+
+    knots_ties:
+      knots_ties_method_name: KnOTS-TIES_paper_like_search
+
+      knots_ties_do_search: true
+      knots_ties_search_strategy: linear
+      knots_ties_search_early_stop: false
+
+      knots_ties_topK: 30
+      knots_ties_topK_candidates: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+
+      knots_ties_scaling_coeffs: 0.5
+      knots_ties_scaling_coeffs_candidates: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+
+      knots_ties_sign_resolve_mode: sum_of_values
+      knots_ties_merging_type: mean
+      knots_concat_across_output: true
+      knots_svd_tol: 1.0e-8
+      knots_verbose_svd: false
+
+      save_best_model: true
+      save: 1
+
+    # linear_tals_drc:
+    #   <<: *tals_common
+
+    #   linear_tals_method_name: Linear_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+    #   tals_method_name: Linear_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+    #   drc_method_name: Linear_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+
+    #   lora_source: default
+    #   lora_root: best_LoRA
+
+    #   linear_tals_load_coarse_from_dir: true
+    #   linear_tals_existing_coarse_prefix: merged_model/Linear_
+
+    #   linear_weights: [0.5, 0.5]
+
+    #   drc_cache_dir: direction_cache_linear_tals_ler_missing_qv_l1_9_k8_g0p5
+    #   save: 0
+
+    linear_tals_drc:
+      <<: *tals_common
+
+      linear_tals_method_name: OSRM_Linear_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+      tals_method_name: OSRM_Linear_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+      drc_method_name: OSRM_Linear_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+
+      lora_source: osrm
+      lora_root: OSRM_LoRA
+
+      linear_tals_load_coarse_from_dir: true
+      linear_tals_existing_coarse_prefix: merged_model/OSRM_Linear_
+
+      linear_weights: [0.5, 0.5]
+
+      drc_cache_dir: direction_cache_osrm_linear_tals_ler_missing_qv_l1_9_k8_g0p5
+      save: 1
+
+    iteris_tals_drc:
+      <<: *tals_common
+      drc_method_name: IterIS_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+      tals_method_name: IterIS_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+      drc_cache_dir: direction_cache_iteris_tals_ler_missing_qv_l1_9_k8_g0p5
+
+    regmean_tals_drc:
+      <<: *tals_common
+      regmean_tals_method_name: RegMean_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+      tals_method_name: RegMean_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+      drc_method_name: RegMean_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+      regmean_alpha: 0.9
+      regmean_eps: 1.0e-6
+      drc_cache_dir: direction_cache_regmean_tals_ler_missing_qv_l1_9_k8_g0p5
+
+    knots_ties_tals_drc:
+      <<: *tals_common
+
+      knots_ties_tals_method_name: KnOTS_TIES_EXISTING_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+      tals_method_name: KnOTS_TIES_EXISTING_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+      drc_method_name: KnOTS_TIES_EXISTING_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+
+      knots_ties_tals_load_coarse_from_dir: true
+      # 注意：全量 run_all 时不需要手动写 coarse_model_dir，
+      # run_all_glue_pairs.py 会自动按 pair 写：
+      # merged_model/KnOTS-TIES_<pair_name>
+      # 如果你单独跑 mnli_cola，可以临时打开下面这一行：
+      # knots_ties_tals_coarse_model_dir: merged_model/KnOTS-TIES_mnli_cola
+
+      drc_cache_dir: direction_cache_knots_ties_existing_tals_ler_missing_qv_l1_9_k8_g0p5
+      save: 1
+
+    dare_tals_drc:
+      <<: *tals_common
+
+      dare_tals_method_name: DARE_TIES_p0p9_s420_k20_EXISTING_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+      tals_method_name: DARE_TIES_p0p9_s420_k20_EXISTING_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+      drc_method_name: DARE_TIES_p0p9_s420_k20_EXISTING_TALS_DRC_LER_missing_qv_l1_9_k8_g0p5_alpha_search
+
+      # 这里只是为了日志/缓存/记录保持一致。
+      # 真正 coarse model 会从 dare_tals_existing_coarse_prefix 自动拼出来。
+      dare_merge_method: dare-ties
+      dare_drop_rate: 0.9
+      dare_seed: 420
+      dare_topK: 20
+      dare_scaling_coeffs: 1.0
+      dare_use_rescale: true
+      dare_do_search: false
+
+      # 关键：加载已有 DARE-TIES dense model，不重新融合
+      dare_tals_load_coarse_from_dir: true
+      dare_tals_existing_coarse_prefix: merged_model/DARE_TIES_p0p9_s420_k20_
+
+      # 关键：换一个新的 cache 目录，避免和旧 DARE_TALS 缓存混用
+      drc_cache_dir: direction_cache_dare_ties_p0p9_s420_k20_existing_tals_ler_missing_qv_l1_9_k8_g0p5
+      save: 1
+
+GLUE_bart:
+  max_iter: 10
+  per_device_eval_batch_size: 32
+  task_targets: ['qqp',  'mrpc']
+  with_pretrain_matrix: 0
+  model_name: "facebook/bart-base"
+  max_length: 256
+  lora_alpha: [32, 32]
+  manual_ceof: [1, 1]
+  select_long: 1
+  samples_num: 50
+  alpha_1: 0.0001
+  alpha_2: 0.0001
+  reg_ceof: 0.0
+  rank: 8
+  if_divide: False
+  if_balance: True # When the types of the label are too many, the labels of the samples that we take should be balance
+  shuffle: True
+  inner_num: 2
+  outer_num: 5
+  save: 0
+
+EMOTION_t5_large:
+  max_iter: 24
+  per_device_eval_batch_size: 8
+  task_targets: ["emoint", "emotion-cause","tec", "isear"]
+  with_pretrain_matrix: 0
+  model_name: "google/flan-t5-large"
+  max_length: 100
+  lora_alpha: [32, 32, 32, 32]
+  manual_ceof: [1, 1, 1, 1]
+  select_long: 1
+  alpha_1: 0.00008
+  alpha_2: 0.00008
+  reg_ceof: 0.0000
+  rank: 8
+  samples_num: 60
+  if_divide: True # For OOM case
+  if_balance: True # When the types of the label are too many, the labels of the samples that we take should be balance
+  shuffle: True # When select the sample
+  inner_num: 6
+  outer_num: 10
+  save: 0
+
+TASKS_blip_base:
+  max_iter: 6
+  per_device_eval_batch_size: 24
+  task_targets:
+  - positive
+  - negative
+  with_pretrain_matrix: 0
+  model_name: pretrained/blip-image-captioning-base
+  max_length: 168
+  max_new_tokens: 42
+  lora_alpha:
+  - 32
+  - 32
+  manual_ceof:
+  - 1
+  - 1
+  select_long: 1
+  alpha_1: 8.0e-07
+  alpha_2: 8.0e-07
+  reg_ceof: 0.0
+  rank: 32
+  samples_num: 50
+  if_divide: false
+  if_balance: false
+  shuffle: true
+  inner_num: 2
+  outer_num: 4
+  save: 1
+  lora_source: default
+  lora_root: loras/SENTICAP-lora-blip
+  linear_method_name: Linear_BLIP
+  linear_weights:
+  - 0.5
+  - 0.5
+  linear_merged_model_dir: merged_model/Linear_BLIP_positive_negative
+  regmean_method_name: RegMean_BLIP
+  regmean_alpha: 0.9
+  regmean_eps: 1.0e-06
+  regmean_merged_model_dir: merged_model/RegMean_BLIP_positive_negative
+  linear_tals_method_name: Linear_TALS_DRC_LER_BLIP_missing_qv_l0_11_k8_g0p5_alpha_search
+  linear_tals_load_coarse_from_dir: true
+  linear_tals_coarse_model_dir: merged_model/Linear_BLIP_positive_negative
+  linear_tals_cache_dir: direction_cache_blip_linear_tals_ler_missing_qv_l0_11_k8_g0p5
+  regmean_tals_method_name: RegMean_TALS_DRC_LER_BLIP_missing_qv_l0_11_k8_g0p5_alpha_search
+  regmean_tals_load_coarse_from_dir: true
+  regmean_tals_coarse_model_dir: merged_model/RegMean_BLIP_positive_negative
+  regmean_tals_cache_dir: direction_cache_blip_regmean_tals_ler_missing_qv_l0_11_k8_g0p5
+  tals_method_name: IterIS_TALS_DRC_LER_BLIP_missing_kqv_l0_11_k8_g0p5_alpha_search
+  drc_method_name: IterIS_TALS_DRC_LER_BLIP_missing_kqv_l0_11_k8_g0p5_alpha_search
+  iteris_drc_merged_model_dir: merged_model/IterIS_TALS_DRC_BLIP_positive_negative
+  dare_merge_method: dare
+  dare_drop_rate: 0.0
+  dare_use_rescale: true
+  dare_seed: 420
+  dare_scaling_coeffs: 0.5
+  dare_topK: 20
+  dare_sign_resolve_mode: sum_of_values
+  dare_merging_type: sum
+  dare_do_search: false
+  dare_search_early_stop: false
+  dare_merged_model_dir: merged_model/DARE_BLIP_p0_linear_sanity_positive_negative
+  save_best_model: true
+  dare_scaling_coeffs_candidates:
+  - 0.1
+  - 0.2
+  - 0.3
+  - 0.5
+  - 0.7
+  - 1.0
+  dare_pruning_coeffs_candidates:
+  - 0.0
+  - 0.1
+  - 0.3
+  - 0.5
+  - 0.7
+  - 0.9
+  dare_topK_candidates:
+  - 10
+  - 20
+  - 30
+  - 50
+  - 70
+  - 90
+  dare_tals_method_name: DARE_TALS_DRC_LER_BLIP_missing_qv_l0_11_k8_g0p5_alpha_search
+  dare_tals_load_coarse_from_dir: true
+  dare_tals_coarse_model_dir: merged_model/DARE_BLIP_p0_linear_sanity_positive_negative
+  dare_tals_cache_dir: direction_cache_blip_dare_tals_ler_missing_qv_l0_11_k8_g0p5
+  knots_method_name: KnOTS_BLIP_CORE_LR16
+  knots_scaling_coeffs: 1.0
+  knots_merging_type: mean
+  knots_concat_across_output: true
+  knots_svd_tol: 1.0e-05
+  knots_verbose_svd: true
+  knots_do_search: false
+  knots_use_effective_delta: true
+  knots_subtract_fresh_reference: false
+  knots_merged_model_dir: merged_model/KnOTS_LR16_BLIP_positive_negative
+  knots_default_scaling_coeffs: 1.0
+  knots_scaling_coeffs_candidates:
+  - 0.1
+  - 0.3
+  - 0.5
+  - 0.7
+  - 1.0
+  knots_ties_method_name: KnOTS_TIES_BLIP
+  knots_ties_topK: 100
+  knots_ties_scaling_coeffs: 0.05
+  knots_ties_sign_resolve_mode: sum_of_values
+  knots_ties_merging_type: mean
+  knots_ties_do_search: false
+  knots_ties_search_strategy: linear
+  knots_ties_search_early_stop: false
+  knots_ties_merged_model_dir: merged_model/KnOTS_TIES_BLIP_positive_negative
+  knots_ties_tals_method_name: KnOTS_TIES_TALS_DRC_LER_BLIP_missing_qv_l0_11_k8_g0p5_alpha_search
+  knots_ties_tals_load_coarse_from_dir: true
+  knots_ties_tals_coarse_model_dir: merged_model/KnOTS_TIES_BLIP_positive_negative
+  knots_ties_tals_cache_dir: direction_cache_blip_knots_ties_tals_ler_missing_qv_l0_11_k8_g0p5
+  drc_inject_position: lora_input
+  drc_alpha_search: true
+  drc_alpha_candidates:
+  - 0.0
+  - 5.0e-05
+  - 0.0001
+  - 0.0003
+  - 0.0005
+  - 0.001
+  - 0.005
+  - 0.007
+  - 0.01
+  - 0.02
+  drc_alpha: 0.001
+  drc_samples_per_task: 50
+  drc_target_part: text_decoder
+  drc_target_modules:
+  - query
+  - value
+  drc_target_layers:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  drc_normalize_direction: true
+  drc_use_hidden_norm_scale: false
+  drc_rebuild_cache: true
+  tals_subspace_source: missing
+  tals_rank: 8
+  tals_gamma: 0.5
+  tals_eps: 1.0e-06
+  tals_weight_norm: mean
+  tals_svd_center: false
+  tals_fallback_to_base: false
+  tals_use_layer_weight: true
+  tals_layer_weight_score: ler_act
+  tals_layer_weight_norm: mean_one
+  tals_layer_weight_clip_min: null
+  tals_layer_weight_clip_max: null
+  drc_cache_dir: direction_cache_blip_iteris_tals_ler_missing_kqv_l0_11_k8_g0p5
+  knots_svd_keep_rank: 16
+  knots_svd_keep_ratio: null
+  knots_svd_keep_energy: null
+  knots_tals_method_name: KnOTS_LR16_TALS_DRC_LER_BLIP_missing_qv_l0_11_k8_g0p5_alpha_search
+  knots_tals_load_coarse_from_dir: true
+  knots_tals_coarse_model_dir: merged_model/KnOTS_LR16_BLIP_positive_negative
+  knots_tals_cache_dir: direction_cache_blip_knots_lr16_tals_ler_missing_qv_l0_11_k8_g0p5
+  knots_linear_method_name: KnOTS_LINEAR_BLIP_LR16_B0p5
+  knots_linear_beta: 0.5
+  knots_linear_linear_weights:
+  - 0.5
+  - 0.5
+  knots_linear_knots_scaling_coeffs: 1.0
+  knots_linear_do_search: false
+  knots_linear_beta_candidates:
+  - 0.0
+  - 0.25
+  - 0.5
+  - 0.75
+  - 1.0
+  knots_linear_merged_model_dir: merged_model/KnOTS_LINEAR_LR16_B0p5_BLIP_positive_negative
+  knots_linear_tals_method_name: KnOTS_LINEAR_TALS_DRC_LER_BLIP_missing_qv_l0_11_k8_g0p5_alpha_search
+  knots_linear_tals_load_coarse_from_dir: true
+  knots_linear_tals_coarse_model_dir: merged_model/KnOTS_LINEAR_LR16_B0p5_BLIP_positive_negative
+  knots_linear_tals_cache_dir: direction_cache_blip_knots_linear_tals_ler_missing_qv_l0_11_k8_g0p5
+

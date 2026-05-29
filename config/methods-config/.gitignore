@@ -1,0 +1,96 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.python-version
+.ipynb_checkpoints/
+
+# =========================
+# Virtual Env
+# =========================
+.venv/
+venv/
+env/
+ENV/
+conda-meta/
+
+# =========================
+# IDE / OS
+# =========================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# =========================
+# Logs / Temp
+# =========================
+logs/
+*.log
+tmp/
+temp/
+*.tmp
+
+# =========================
+# Experiment Outputs
+# =========================
+results/
+outputs/
+batch_runs/
+merged_model/
+direction_cache*/
+savevvvv
+
+# =========================
+# Local Model / Cache
+# =========================
+pretrained/
+local_models/
+nltk_data/
+.cache/
+huggingface/
+hf_cache/
+
+# =========================
+# Local Datasets
+# =========================
+glue_local/
+data/Emotion_v2.5/
+data/FlickrStyle10k/
+data/SENTICAP/val2014/
+
+# =========================
+# Large Checkpoints / Weights
+# =========================
+best_LoRA/
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# =========================
+# Keep Source Code, Ignore Large LoRA Artifacts
+# =========================
+loras/**/checkpoint-*/
+loras/SENTICAP-lora-blip/**/adapter_model.safetensors
+
+# If you only want to keep placeholder READMEs under LoRA dirs,
+# uncomment the following two lines:
+# loras/GLUE-lora-t5/**/*
+# !loras/GLUE-lora-t5/**/README.md
+
+# =========================
+# Optional: generated evaluation files
+# =========================
+*.jsonl
+*.csv
+
+# If you want to keep manually written CSV examples in the future,
+# comment out the line above and ignore only these:
+# results/
+# outputs/

@@ -1,0 +1,58 @@
+task_name: 'wnli'
+training:
+  learning_rate: 0.00005
+  num_train_epochs: 80
+  per_device_train_batch_size: 16
+  per_device_eval_batch_size: 24
+  warmup_steps: 100
+  weight_decay: 0.001
+  output_dir: 'loras/GLUE-lora-t5/wnli'
+  logging_dir: 'loras/GLUE-lora-t5/wnli/logs'
+  save_steps: 500
+  do_train: True              
+  greater_is_better: True 
+  metric_for_best_model: 'eval_accuracy'
+  evaluation_strategy: "steps"
+  save_total_limit: 500
+  eval_steps : 500
+  logging_steps: 10
+  load_best_model_at_end: True
+  label_names: ["labels"]
+  eval_accumulation_steps: 2
+
+lora_config: 
+  r: 8
+  lora_alpha: 32
+  lora_dropout: 0.08
+  target_modules: ["q", "v"]
+
+rand_seed: 42
+
+model_name_or_path: /data2/centrai/mizijie_intern/IterIS-merging-main/flan-t5-base
+glue_root: /data2/centrai/mizijie_intern/IterIS-merging-main/glue_local
+max_length: 256
+
+osrm:
+  enabled: true
+
+  reference_tasks: ["mnli", "rte", "cola", "sst2", "qqp", "qnli", "mrpc", "wnli"]
+  exclude_current_task: true
+
+  num_samples_per_task: 100
+  feature_split: train
+  feature_batch_size: 8
+
+  cache_dir: osrm_feature_cache
+  rebuild_cache: false
+
+  center_features: false
+  target_part: null
+
+  zero_B: true
+  freeze_A: false
+  fallback_to_gaussian: false
+
+  export_best_model: true
+  output_root: OSRM_LoRA
+  output_name_template: "T5-{TASK_UPPER}-LoRA"
+  overwrite_output: true
