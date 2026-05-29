@@ -225,7 +225,7 @@ data/SENTICAP/
 因此，本仓库采用如下交付策略：
 
 1. **单任务 LoRA 微调权重会单独保存和提供**
-百度网盘链接：
+  百度网盘链接：
 
 https://pan.baidu.com/s/1v9r6fZn3IyY7idGCtcEo0A
 
