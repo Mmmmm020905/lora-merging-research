@@ -225,11 +225,32 @@ data/SENTICAP/
 因此，本仓库采用如下交付策略：
 
 1. **单任务 LoRA 微调权重会单独保存和提供**
-   单 LoRA 权重体积相对较小，是复现后续融合实验的基础。当前主要包括：
+百度网盘链接：
 
-   * GLUE 普通 LoRA；
-   * GLUE OSRM LoRA；
-   * SENTICAP/BLIP positive 与 negative LoRA。
+https://pan.baidu.com/s/1v9r6fZn3IyY7idGCtcEo0A
+
+提取码：
+
+1234
+
+分享文件夹名称：
+
+LoRA_Merging_Artifacts
+
+该文件夹主要包含以下内容：
+
+LoRA_Merging_Artifacts/
+├── 01_single_lora_finetuning/
+│   ├── 01_GLUE_normal_lora/
+│   ├── 02_GLUE_OSRM_lora/
+│   └── 03_SENTICAP_BLIP_lora/
+
+其中：
+
+目录	内容说明
+01_GLUE_normal_lora/	普通 GLUE 单任务 LoRA 权重
+02_GLUE_OSRM_lora/	使用 OSRM 训练得到的 GLUE 单任务 LoRA 权重
+03_SENTICAP_BLIP_lora/	SENTICAP/BLIP positive 与 negative 风格 LoRA 权重
 
 2. **融合后的 dense model 默认不全部提供**
    对于 Linear、RegMean、DARE、KnOTS、IterIS 以及 TALS-DRC 等融合方法，默认不在仓库中直接保存所有 pair 的合并后模型权重。若需要某个具体 pair 的融合模型，可以根据本仓库提供的脚本、配置文件和命令重新生成。
